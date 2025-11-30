@@ -1,0 +1,31 @@
+# feature2.py - Feature 2: Export & Import CSV
+import csv
+from tkinter import filedialog, messagebox
+
+def setup(app):
+    frame = tk.Frame(app)
+    frame.pack(pady=20)
+    tk.Button(frame, text="Export CSV", command=lambda: export_csv(app)).pack(side=tk.LEFT, padx=30)
+    tk.Button(frame, text="Import CSV", command=lambda: import_csv(app)).pack(side=tk.LEFT, padx=30)
+
+def export_csv(app):
+    if not app.tasks:
+        messagebox.showwarning("Empty", "No tasks")
+        return
+    path = filedialog.asksaveasfilename(defaultextension=".csv")
+    if path:
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["Task","Minutes"])
+            w.writerows(app.tasks)
+        messagebox.showinfo("Done", "Exported!")
+
+def import_csv(app):
+    path = filedialog.askopenfilename(filetypes=[("CSV","*.csv")])
+    if path:
+        with open(path, "r", encoding="utf-8") as f:
+            r = csv.reader(f)
+            next(r, None)
+            app.tasks = [(row[0], int(row[1])) for row in r if len(row)>=2]
+        app.children["!feature1"].winfo_children()[0].winfo_children()[0].invoke()  # refresh
+        messagebox.showinfo("Done", "Imported!")
